@@ -8,7 +8,6 @@ Users can define automations like:
 Workflows are triggered by Kafka events or scheduled cron-like jobs.
 """
 
-import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum

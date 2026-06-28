@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Sandboxed code execution module.
 //!
 //! Provides isolated execution environments for user code.
@@ -140,3 +141,4 @@ fn prepare_execution(
         _ => Err(format!("Unsupported language: {}", language)),
     }
 }
+

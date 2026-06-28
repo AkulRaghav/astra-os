@@ -6,7 +6,6 @@ Listens for events from other services and triggers AI workflows:
 - email_received → notification + AI summary option
 """
 
-import asyncio
 import json
 from typing import Any
 

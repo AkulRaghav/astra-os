@@ -2,10 +2,9 @@
 
 import httpx
 import os
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
 
-from app.config import settings
 
 router = APIRouter()
 

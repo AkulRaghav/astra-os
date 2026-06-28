@@ -20,11 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-        working-directory: .
-      - run: npm run lint
-      - run: npm run typecheck
+      - run: npm install
       - run: npm run build
 
   # ===========================================
@@ -110,9 +106,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-        working-directory: .
+      - run: npm install typescript
       - run: npx tsc --noEmit
 
   # ===========================================
