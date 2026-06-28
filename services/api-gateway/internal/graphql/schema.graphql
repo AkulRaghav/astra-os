@@ -1,0 +1,543 @@
+type Query {
+  # User & Profile
+  me: User!
+  user(id: ID!): User
+  
+  # Files
+  files(parentId: ID, path: String): [FileNode!]!
+  file(id: ID!): FileNode
+  storageQuota: StorageQuota!
+  searchFiles(query: String!): [FileNode!]!
+  
+  # Notes
+  notes(folderId: ID): [Note!]!
+  note(id: ID!): Note
+  searchNotes(query: String!): [Note!]!
+  
+  # Tasks
+  tasks(status: TaskStatus, priority: TaskPriority): [Task!]!
+  task(id: ID!): Task
+  
+  # Calendar
+  events(start: String!, end: String!): [CalendarEvent!]!
+  event(id: ID!): CalendarEvent
+  
+  # Mail
+  emails(folder: MailFolder!, limit: Int, offset: Int): [Email!]!
+  email(id: ID!): Email
+  mailFolders: [MailFolderInfo!]!
+  
+  # Notifications
+  notifications(unreadOnly: Boolean): [Notification!]!
+  unreadNotificationCount: Int!
+  
+  # Plugins
+  plugins(category: PluginCategory, search: String): [Plugin!]!
+  plugin(id: ID!): Plugin
+  installedPlugins: [PluginInstall!]!
+  
+  # AI Agents
+  agents: [AIAgent!]!
+  agent(id: ID!): AIAgent
+  conversations(agentId: ID): [Conversation!]!
+  conversation(id: ID!): Conversation
+  
+  # Workspace
+  workspaces: [Workspace!]!
+  workspace(id: ID!): Workspace
+  collaborationBoard(id: ID!): CollaborationBoard
+  
+  # Analytics
+  analyticsSummary(period: AnalyticsPeriod!): AnalyticsSummary!
+  
+  # Billing
+  billingInfo: BillingInfo
+  invoices: [Invoice!]!
+  plans: [BillingPlan!]!
+  
+  # Settings
+  settings: UserSettings!
+}
+
+type Mutation {
+  # Profile
+  updateProfile(input: UpdateProfileInput!): User!
+  updateAvatar(url: String!): User!
+  
+  # Files
+  createFolder(name: String!, parentId: ID): FileNode!
+  uploadFile(input: UploadFileInput!): FileNode!
+  renameFile(id: ID!, name: String!): FileNode!
+  moveFile(id: ID!, parentId: ID): FileNode!
+  deleteFile(id: ID!): Boolean!
+  shareFile(id: ID!, userId: ID!, permission: FilePermission!): FileNode!
+  
+  # Notes
+  createNote(input: CreateNoteInput!): Note!
+  updateNote(id: ID!, input: UpdateNoteInput!): Note!
+  deleteNote(id: ID!): Boolean!
+  
+  # Tasks
+  createTask(input: CreateTaskInput!): Task!
+  updateTask(id: ID!, input: UpdateTaskInput!): Task!
+  deleteTask(id: ID!): Boolean!
+  
+  # Calendar
+  createEvent(input: CreateEventInput!): CalendarEvent!
+  updateEvent(id: ID!, input: UpdateEventInput!): CalendarEvent!
+  deleteEvent(id: ID!): Boolean!
+  
+  # Mail
+  sendEmail(input: SendEmailInput!): Email!
+  moveEmail(id: ID!, folder: MailFolder!): Email!
+  markEmailRead(id: ID!, isRead: Boolean!): Email!
+  deleteEmail(id: ID!): Boolean!
+  
+  # Notifications
+  markNotificationRead(id: ID!): Notification!
+  markAllNotificationsRead: Boolean!
+  deleteNotification(id: ID!): Boolean!
+  
+  # Plugins
+  installPlugin(pluginId: ID!): PluginInstall!
+  uninstallPlugin(pluginId: ID!): Boolean!
+  togglePlugin(pluginId: ID!, enabled: Boolean!): PluginInstall!
+  
+  # AI Agents
+  createConversation(agentId: ID!, title: String): Conversation!
+  sendMessage(conversationId: ID!, content: String!): Message!
+  deleteConversation(id: ID!): Boolean!
+  
+  # Workspace
+  createWorkspace(input: CreateWorkspaceInput!): Workspace!
+  inviteMember(workspaceId: ID!, userId: ID!, role: WorkspaceMemberRole!): Workspace!
+  removeMember(workspaceId: ID!, userId: ID!): Workspace!
+  
+  # Billing
+  createCheckoutSession(planId: ID!): CheckoutSession!
+  cancelSubscription: BillingInfo!
+  
+  # Settings
+  updateSettings(input: UpdateSettingsInput!): UserSettings!
+}
+
+type Subscription {
+  # Real-time notifications
+  notificationReceived: Notification!
+  
+  # Presence
+  userPresenceChanged(workspaceId: ID!): PresenceUpdate!
+  
+  # Collaboration
+  collaborationUpdate(boardId: ID!): CollaborationUpdate!
+  
+  # AI chat streaming
+  messageStream(conversationId: ID!): MessageChunk!
+}
+
+# --- Types ---
+
+type User {
+  id: ID!
+  email: String!
+  displayName: String!
+  avatarUrl: String
+  role: UserRole!
+  plan: PlanTier!
+  twoFactorEnabled: Boolean!
+  profile: UserProfile
+  createdAt: String!
+  updatedAt: String!
+}
+
+type UserProfile {
+  bio: String
+  timezone: String!
+  language: String!
+  theme: ThemePreference!
+  notificationsEnabled: Boolean!
+}
+
+type FileNode {
+  id: ID!
+  name: String!
+  type: FileType!
+  mimeType: String
+  size: Int!
+  parentId: ID
+  path: String!
+  ownerId: ID!
+  sharedWith: [FileShare!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type FileShare {
+  userId: ID!
+  permission: FilePermission!
+}
+
+type StorageQuota {
+  used: Int!
+  total: Int!
+}
+
+type Note {
+  id: ID!
+  title: String!
+  content: String!
+  format: NoteFormat!
+  tags: [String!]!
+  ownerId: ID!
+  isPinned: Boolean!
+  isArchived: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Task {
+  id: ID!
+  title: String!
+  description: String
+  status: TaskStatus!
+  priority: TaskPriority!
+  dueDate: String
+  assigneeId: ID
+  ownerId: ID!
+  tags: [String!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type CalendarEvent {
+  id: ID!
+  title: String!
+  description: String
+  startTime: String!
+  endTime: String!
+  isAllDay: Boolean!
+  location: String
+  recurrence: RecurrenceRule
+  attendees: [String!]!
+  color: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type RecurrenceRule {
+  frequency: RecurrenceFrequency!
+  interval: Int!
+  endDate: String
+  count: Int
+}
+
+type Email {
+  id: ID!
+  subject: String!
+  body: String!
+  from: EmailAddress!
+  to: [EmailAddress!]!
+  cc: [EmailAddress!]
+  folder: MailFolder!
+  isRead: Boolean!
+  isStarred: Boolean!
+  hasAttachments: Boolean!
+  receivedAt: String!
+}
+
+type EmailAddress {
+  name: String
+  email: String!
+}
+
+type MailFolderInfo {
+  folder: MailFolder!
+  count: Int!
+  unreadCount: Int!
+}
+
+type Notification {
+  id: ID!
+  type: NotificationType!
+  title: String!
+  message: String!
+  actionUrl: String
+  isRead: Boolean!
+  createdAt: String!
+}
+
+type Plugin {
+  id: ID!
+  name: String!
+  slug: String!
+  description: String!
+  version: String!
+  author: String!
+  iconUrl: String
+  category: PluginCategory!
+  tags: [String!]!
+  downloads: Int!
+  rating: Float!
+  isOfficial: Boolean!
+  pricing: PluginPricing!
+}
+
+type PluginInstall {
+  id: ID!
+  pluginId: ID!
+  plugin: Plugin!
+  installedAt: String!
+  isEnabled: Boolean!
+}
+
+type AIAgent {
+  id: ID!
+  name: String!
+  type: AgentType!
+  description: String!
+  capabilities: [String!]!
+  model: String!
+  isActive: Boolean!
+}
+
+type Conversation {
+  id: ID!
+  title: String!
+  agentId: ID!
+  messages: [Message!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Message {
+  id: ID!
+  role: MessageRole!
+  content: String!
+  createdAt: String!
+}
+
+type MessageChunk {
+  conversationId: ID!
+  content: String!
+  done: Boolean!
+}
+
+type Workspace {
+  id: ID!
+  name: String!
+  description: String
+  ownerId: ID!
+  members: [WorkspaceMember!]!
+  type: WorkspaceType!
+  createdAt: String!
+}
+
+type WorkspaceMember {
+  userId: ID!
+  role: WorkspaceMemberRole!
+  user: User!
+  joinedAt: String!
+}
+
+type CollaborationBoard {
+  id: ID!
+  workspaceId: ID!
+  name: String!
+  activeUsers: [ID!]!
+}
+
+type CollaborationUpdate {
+  boardId: ID!
+  userId: ID!
+  operation: String!
+  data: String!
+}
+
+type PresenceUpdate {
+  userId: ID!
+  status: PresenceStatus!
+  lastSeen: String
+}
+
+type AnalyticsSummary {
+  totalVisitors: Int!
+  totalSessions: Int!
+  bounceRate: Float!
+  avgSessionDuration: Float!
+  topPages: [PageView!]!
+  dailyActiveUsers: [DailyMetric!]!
+}
+
+type PageView {
+  path: String!
+  views: Int!
+}
+
+type DailyMetric {
+  date: String!
+  value: Int!
+}
+
+type BillingInfo {
+  id: ID!
+  plan: BillingPlan!
+  status: SubscriptionStatus!
+  currentPeriodEnd: String!
+}
+
+type BillingPlan {
+  id: ID!
+  name: String!
+  tier: PlanTier!
+  priceMonthly: Float!
+  priceYearly: Float!
+  features: [String!]!
+}
+
+type Invoice {
+  id: ID!
+  amount: Float!
+  currency: String!
+  status: InvoiceStatus!
+  createdAt: String!
+}
+
+type CheckoutSession {
+  url: String!
+  sessionId: String!
+}
+
+type UserSettings {
+  theme: ThemePreference!
+  language: String!
+  timezone: String!
+  notificationsEnabled: Boolean!
+  emailNotifications: Boolean!
+  pushNotifications: Boolean!
+}
+
+# --- Enums ---
+
+enum UserRole { USER ADMIN SUPERADMIN }
+enum PlanTier { FREE PRO ENTERPRISE }
+enum ThemePreference { LIGHT DARK SYSTEM }
+enum FileType { FILE FOLDER }
+enum FilePermission { READ WRITE ADMIN }
+enum NoteFormat { MARKDOWN RICHTEXT PLAINTEXT }
+enum TaskStatus { TODO IN_PROGRESS DONE CANCELLED }
+enum TaskPriority { LOW MEDIUM HIGH URGENT }
+enum RecurrenceFrequency { DAILY WEEKLY MONTHLY YEARLY }
+enum MailFolder { INBOX SENT DRAFTS SPAM TRASH ARCHIVE }
+enum NotificationType { SYSTEM FILE_SHARED TASK_ASSIGNED TASK_COMPLETED CALENDAR_REMINDER EMAIL_RECEIVED AI_COMPLETED COLLABORATION_INVITE PLUGIN_UPDATE }
+enum PluginCategory { PRODUCTIVITY DEVELOPMENT COMMUNICATION DESIGN ANALYTICS AI INTEGRATION OTHER }
+enum PluginPricing { FREE PAID FREEMIUM }
+enum AgentType { ASSISTANT CODE_HELPER DATA_ANALYST CONTENT_WRITER RESEARCHER CUSTOM }
+enum MessageRole { USER ASSISTANT SYSTEM }
+enum WorkspaceType { PERSONAL TEAM COLLABORATION }
+enum WorkspaceMemberRole { OWNER ADMIN EDITOR VIEWER }
+enum PresenceStatus { ONLINE AWAY OFFLINE }
+enum SubscriptionStatus { ACTIVE PAST_DUE CANCELLED TRIALING }
+enum InvoiceStatus { PAID PENDING FAILED }
+enum AnalyticsPeriod { DAY WEEK MONTH YEAR }
+
+# --- Inputs ---
+
+input UpdateProfileInput {
+  displayName: String
+  bio: String
+  timezone: String
+  language: String
+}
+
+input UploadFileInput {
+  name: String!
+  parentId: ID
+  mimeType: String!
+  size: Int!
+}
+
+input CreateNoteInput {
+  title: String!
+  content: String
+  format: NoteFormat
+  tags: [String!]
+}
+
+input UpdateNoteInput {
+  title: String
+  content: String
+  tags: [String!]
+  isPinned: Boolean
+  isArchived: Boolean
+}
+
+input CreateTaskInput {
+  title: String!
+  description: String
+  priority: TaskPriority
+  dueDate: String
+  assigneeId: ID
+  tags: [String!]
+}
+
+input UpdateTaskInput {
+  title: String
+  description: String
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: String
+  assigneeId: ID
+  tags: [String!]
+}
+
+input CreateEventInput {
+  title: String!
+  description: String
+  startTime: String!
+  endTime: String!
+  isAllDay: Boolean
+  location: String
+  recurrence: RecurrenceRuleInput
+  attendees: [String!]
+  color: String
+}
+
+input UpdateEventInput {
+  title: String
+  description: String
+  startTime: String
+  endTime: String
+  isAllDay: Boolean
+  location: String
+  color: String
+}
+
+input RecurrenceRuleInput {
+  frequency: RecurrenceFrequency!
+  interval: Int!
+  endDate: String
+  count: Int
+}
+
+input SendEmailInput {
+  to: [String!]!
+  cc: [String!]
+  subject: String!
+  body: String!
+  bodyHtml: String
+}
+
+input CreateWorkspaceInput {
+  name: String!
+  description: String
+  type: WorkspaceType!
+}
+
+input UpdateSettingsInput {
+  theme: ThemePreference
+  language: String
+  timezone: String
+  notificationsEnabled: Boolean
+  emailNotifications: Boolean
+  pushNotifications: Boolean
+}

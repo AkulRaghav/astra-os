@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package astra.ai;
+
+option go_package = "github.com/astra-os/proto/ai";
+
+service AIService {
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Send a message to an AI agent
+  rpc Chat(ChatRequest) returns (ChatResponse);
+  
+  // Stream chat response
+  rpc ChatStream(ChatRequest) returns (stream ChatChunk);
+  
+  // Generate embeddings for text
+  rpc Embed(EmbedRequest) returns (EmbedResponse);
+  
+  // Semantic search
+  rpc SemanticSearch(SearchRequest) returns (SearchResponse);
+  
+  // Transcribe audio
+  rpc Transcribe(TranscribeRequest) returns (TranscribeResponse);
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+  string service = 2;
+}
+
+message ChatRequest {
+  string conversation_id = 1;
+  string user_id = 2;
+  string agent_type = 3;
+  string message = 4;
+  repeated string context_file_ids = 5;
+}
+
+message ChatResponse {
+  string message_id = 1;
+  string content = 2;
+  string agent_type = 3;
+  repeated ToolCall tool_calls = 4;
+}
+
+message ChatChunk {
+  string content = 1;
+  bool done = 2;
+  string message_id = 3;
+}
+
+message ToolCall {
+  string name = 1;
+  string arguments = 2;
+  string result = 3;
+}
+
+message EmbedRequest {
+  repeated string texts = 1;
+  string model = 2;
+}
+
+message EmbedResponse {
+  repeated Embedding embeddings = 1;
+}
+
+message Embedding {
+  repeated float values = 1;
+  int32 dimensions = 2;
+}
+
+message SearchRequest {
+  string query = 1;
+  string user_id = 2;
+  int32 limit = 3;
+  float min_score = 4;
+  repeated string file_types = 5;
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+message SearchResult {
+  string id = 1;
+  string content = 2;
+  string source = 3;
+  float score = 4;
+  map<string, string> metadata = 5;
+}
+
+message TranscribeRequest {
+  bytes audio_data = 1;
+  string format = 2;       // "wav", "mp3", "webm"
+  string language = 3;     // ISO language code or empty for auto-detect
+}
+
+message TranscribeResponse {
+  string text = 1;
+  float confidence = 2;
+  string language = 3;
+}

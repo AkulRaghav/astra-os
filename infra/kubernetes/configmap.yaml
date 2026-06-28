@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: astra-config
+  namespace: astra
+  labels:
+    app.kubernetes.io/part-of: astra
+data:
+  # Application
+  BASE_URL: "https://api.astra.dev"
+  FRONTEND_URL: "https://app.astra.dev"
+  PORT: "8080"
+  WS_PORT: "8081"
+
+  # Service discovery
+  AI_SERVICE_URL: "ai-service.astra.svc.cluster.local:50051"
+  RUST_SERVICE_URL: "core-rust.astra.svc.cluster.local:50052"
+  WS_GATEWAY_URL: "ws-gateway.astra.svc.cluster.local:8081"
+
+  # Database (host only; credentials in secrets)
+  DATABASE_HOST: "astra-postgres.astra.svc.cluster.local"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "astra"
+
+  # Redis
+  REDIS_URL: "redis://astra-redis.astra.svc.cluster.local:6379/0"
+
+  # S3 / Object storage
+  S3_REGION: "us-east-1"
+  S3_BUCKET: "astra-files-prod"
+
+  # Logging & Observability
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  OTEL_EXPORTER_ENDPOINT: "http://otel-collector.observability.svc.cluster.local:4317"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX_TOKENS: "100"
+  RATE_LIMIT_REFILL_RATE: "10"
+
+  # Misc
+  CORS_ORIGIN: "https://app.astra.dev"
+  JWT_ACCESS_EXPIRY: "15m"
+  JWT_REFRESH_EXPIRY: "168h"
+  MAX_UPLOAD_SIZE_MB: "100"

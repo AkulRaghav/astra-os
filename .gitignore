@@ -44,3 +44,11 @@ htmlcov/
 
 # Local tools
 tools/
+
+# Test files
+test*.json
+test*.py
+check_*.py
+*.exe
+package-lock.json
+Cargo.lock

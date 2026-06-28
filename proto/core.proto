@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package astra.core;
+
+option go_package = "github.com/astra-os/proto/core";
+
+service CoreService {
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Sandboxed code execution
+  rpc ExecuteCode(ExecuteCodeRequest) returns (ExecuteCodeResponse);
+  
+  // High-performance file operations
+  rpc FileOperation(FileOperationRequest) returns (FileOperationResponse);
+  
+  // Stream code execution output
+  rpc ExecuteCodeStream(ExecuteCodeRequest) returns (stream ExecuteCodeChunk);
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+  string service = 2;
+}
+
+message ExecuteCodeRequest {
+  string language = 1;      // "python", "javascript", "bash", etc.
+  string code = 2;
+  string session_id = 3;    // For maintaining terminal sessions
+  int32 timeout_ms = 4;     // Max execution time
+  map<string, string> env = 5;  // Environment variables
+}
+
+message ExecuteCodeResponse {
+  string stdout = 1;
+  string stderr = 2;
+  int32 exit_code = 3;
+  int64 execution_time_ms = 4;
+}
+
+message ExecuteCodeChunk {
+  string output = 1;
+  string stream = 2;  // "stdout" or "stderr"
+  bool done = 3;
+  int32 exit_code = 4;
+}
+
+message FileOperationRequest {
+  string operation = 1;   // "read", "write", "hash", "compress", "decompress"
+  string path = 2;
+  bytes data = 3;
+  map<string, string> options = 4;
+}
+
+message FileOperationResponse {
+  bool success = 1;
+  string message = 2;
+  bytes data = 3;
+}

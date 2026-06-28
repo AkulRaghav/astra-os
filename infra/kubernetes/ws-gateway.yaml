@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ws-gateway
+  namespace: astra
+  labels:
+    app: ws-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ws-gateway
+  template:
+    metadata:
+      labels:
+        app: ws-gateway
+    spec:
+      containers:
+        - name: ws-gateway
+          image: astra/ws-gateway:latest
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - secretRef:
+                name: astra-secrets
+            - configMapRef:
+                name: astra-config
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ws-gateway
+  namespace: astra
+spec:
+  selector:
+    app: ws-gateway
+  ports:
+    - port: 8081
+      targetPort: 8081
+  type: ClusterIP
